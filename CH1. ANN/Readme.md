@@ -17,3 +17,45 @@ ANN은 인공신경망을 총칭하는 용어로 단일 은닉계층의 ANN은 �
 
 
 ## 2 분류ANN
+: 입력정보를 바탕으로 해당 입력이 어느 클래스에 속하는지를 결정하는 문제
+- 분류 ANN은 손실함수로 교차엔트로피를 사용한다. 
+- 출력 노드값은 소프트맥스 연산으로 구한다. 
+
+1. 필요한 패키지 load
+``` from keras import layers, models ```
+- layers : 각 계층을 만드는 모듈
+- models : 만든 신경망 모델을 컴파일하고 학습시키는 역할
+  - compile()
+  - fit()
+  - predict()
+  - evaluate()
+2. 파라미터설정
+  - Nin :입력계층 노드수
+  - Nh : 은닉계층 노드수
+  - number_of_class : class수
+  - Nout : 출력노드 수
+3. 모델링
+  1. 연쇄방식 (간단)
+  ``` x=layers.Input(shape=(Nin,))``` 
+  - 입력계층은 layers.Input()함수로 지정한다. 
+  ``` h=layers.Activation('relu')(layers.Dense(Nh)(x))```
+  - 은닉계층은 layers.Dense()로 지정한다. 
+  - x를 입력으로 받아들이도록 layers.Dense(Nh)(x)로 지정한다. 
+  ``` y=layers.Activation('softmax')(layers.Dense(Nout)(h))```
+  - 출력노드수는 클래스수로 지정한다.
+  ``` model=models.Model(x,y)```
+  - 모델은 입력과 출력을 지정하여 만든다. 
+  ``` model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy']) ```
+  - 손실과 최적화함수를 지정한다.
+  - metric은 학습이나 예측이 진행될때 성능검증을 위해 손실뿐아니라 정확도 즉, accuracy도 측정하라는 의미이다.
+  
+  2. 분산방식 (복잡)
+  4. 함수형
+  5. 객체지향형
+4. 
+
+
+## 3 회귀ANN
+: 입력값으로부터 출력값을 직접 예측하는 방법
+- 정보벡터를 이용해 예측할 수 있도록 학습된다. 
+- 손실함수로 보통 MSE 즉, 평균제곱오차를 사용한다.
