@@ -35,23 +35,32 @@ ANN은 인공신경망을 총칭하는 용어로 단일 은닉계층의 ANN은 �
   - number_of_class : class수
   - Nout : 출력노드 수
 3. 모델링
-  1. 연쇄방식 (간단)
-  ``` x=layers.Input(shape=(Nin,))``` 
-  - 입력계층은 layers.Input()함수로 지정한다. 
-  ``` h=layers.Activation('relu')(layers.Dense(Nh)(x))```
-  - 은닉계층은 layers.Dense()로 지정한다. 
-  - x를 입력으로 받아들이도록 layers.Dense(Nh)(x)로 지정한다. 
-  ``` y=layers.Activation('softmax')(layers.Dense(Nout)(h))```
-  - 출력노드수는 클래스수로 지정한다.
-  ``` model=models.Model(x,y)```
-  - 모델은 입력과 출력을 지정하여 만든다. 
-  ``` model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy']) ```
-  - 손실과 최적화함수를 지정한다.
-  - metric은 학습이나 예측이 진행될때 성능검증을 위해 손실뿐아니라 정확도 즉, accuracy도 측정하라는 의미이다.
-  
-  2. 분산방식 (복잡)
-  4. 함수형
-  5. 객체지향형
+    1. 연쇄방식_함수형 (간단)\
+    ``` model = models.Sequential()```
+    - 연쇄방식은 모델구조를 정의하기 전 Sequential()로 모델을 초기화해야한다.
+    ``` 
+    model.add(layers.Dense(Nh,activation='relu', input_shape=(Nin,)))
+    model.add(layers.Dense(Nout,activation='softmax')) 
+    ```
+    - 첫번째 add()단계에서 입력계층과 은닉계층의 형태가 동시에 정해진다.
+
+
+    2. 분산방식_함수형 (복잡)\
+    ``` x=layers.Input(shape=(Nin,))``` 
+    - 입력계층은 layers.Input()함수로 지정한다. \
+    ``` h=layers.Activation('relu')(layers.Dense(Nh)(x))```
+    - 은닉계층은 layers.Dense()로 지정한다. 
+    - x를 입력으로 받아들이도록 layers.Dense(Nh)(x)로 지정한다. \
+    ``` y=layers.Activation('softmax')(layers.Dense(Nout)(h))```
+    - 출력노드수는 클래스수로 지정한다.\
+    ``` model=models.Model(x,y)```
+    - 모델은 입력과 출력을 지정하여 만든다. \
+    ``` model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy']) ```
+    - 손실과 최적화함수를 지정한다.
+    - metric은 학습이나 예측이 진행될때 성능검증을 위해 손실뿐아니라 정확도 즉, accuracy도 측정하라는 의미이다.
+    
+    3. 연쇄방식_객체지향형
+    4. 분산방식_객체지향형
 4. 
 
 
