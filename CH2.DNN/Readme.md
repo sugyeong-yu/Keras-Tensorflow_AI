@@ -47,7 +47,18 @@ class DNN(models.Sequential):
 ```
 self.add(layers.Dense(Nh_l[0],activation='relu', input_shape=(Nin,), name='Hidden-1'))
 self.add(layers.Dropout(0.2)
+self.add(layers.Dense(Nh_l[1],activation='relu', name='Hidden-2'))
+self.add(layers.Dropout(0.2))
+self.add(layers.Dense(Nout,activation='softmax'))
 ```
+- 두번째 은닉층은 이전 계층의 노드수를 적지않아도 된다. (케라스가 자동으로 설정)
 - Dropout(p)는 p의 확률로 출력노드의 신호를 보낼지말지를 결정하는것. 
   - 이는 학습할때와 성능평가할때 다르게 동작한다. (케라스가 자동으로 처리)
-  
+```
+self.compile(loss=categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+```
+- 분류클래스수가 2개 이상이므로 categorical_crossentropy를 사용함. 
+
+## 2.3 학습 및 평가
+- 최종 성능평가 손실과 정확도는 각각 0.099와 0.97로 ANN의 결과(0.109,0.97)와 매우 유사하다.
+- 하지만 학습데이터가 작거나 복잡한 이미지에서는 일반적으로 DNN이 더 우수한 성능일 보인다고 알려져있다.
