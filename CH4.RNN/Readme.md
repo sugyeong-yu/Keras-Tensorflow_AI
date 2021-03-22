@@ -122,3 +122,20 @@ class Machine:
 ```
 - 평가결과는 수행하는 컴퓨터마다 무작위로 선정되는 seed값의 차이로 약간 달라질 수 있다.
 - 전체 코드는 [4-1.py](https://github.com/sugyeong-yu/Keras_AI/blob/main/CH4.RNN/4-1.py)에서 확인가능하다.
+
+## 3. 시계열데이터를 예측하는 LSTM구현
+- 세계항공여행승객 수의 증가에 대한 데이터를 활용해
+- 이전 12월치 승객 수를 이용해 다음달의 승객 수를 예측한다.
+### 3.1 패키지 임포트
+```
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn import model_selection
+from keras import models, layers
+import seaborn as sns
+
+from keraspp import skeras
+```
+- model_selection : 데이터를 학습과 검증용으로 나누는 함수
+- skeras : 케라스 학습결과를 그래프로 그려주는 기능을 제공하는 서브패키지
