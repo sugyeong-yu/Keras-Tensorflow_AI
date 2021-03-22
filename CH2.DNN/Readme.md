@@ -43,6 +43,7 @@ class DNN(models.Sequential):
   def __init__(self,Nin,Nh_l,Nout):
     super().__init__()
 ```
+- DNN객체를 ```models.Sequential```로 부터 상속받는다.
 - 은닉계층과 출력계층은 모두 케라스의 layers패키지 아래 Dense()개체로 구성한다.
 ```
 self.add(layers.Dense(Nh_l[0],activation='relu', input_shape=(Nin,), name='Hidden-1'))
@@ -63,3 +64,4 @@ self.compile(loss=categorical_crossentropy', optimizer='adam', metrics=['accurac
 - 최종 성능평가 손실과 정확도는 각각 0.099와 0.97로 ANN의 결과(0.109,0.97)와 매우 유사하다.
 - 하지만 학습데이터가 작거나 복잡한 이미지에서는 일반적으로 DNN이 더 우수한 성능을 보인다고 알려져있다.
 
+# 3. 컬러 이미지를 분류하는 DNN구현
