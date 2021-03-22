@@ -121,4 +121,4 @@ class Machine:
         print('Test performance: accuracy={0}, loss={1}'.format(acc, score))
 ```
 - 평가결과는 수행하는 컴퓨터마다 무작위로 선정되는 seed값의 차이로 약간 달라질 수 있다.
-- 전체 코드는 [4-1.py]()에서 확인가능하다.
+- 전체 코드는 [4-1.py](https://github.com/sugyeong-yu/Keras_AI/blob/main/CH4.RNN/4-1.py)에서 확인가능하다.
