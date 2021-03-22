@@ -5,7 +5,7 @@ number_of_class = 10
 Nout = number_of_class
  
 # 분류 DNN 모델 구현 ########################
-from keras import layers, models
+from tensorflow.keras import layers, models
  
 class DNN(models.Sequential):
     def __init__(self, Nin, Nh_l, Nout):
@@ -19,8 +19,8 @@ class DNN(models.Sequential):
         
 # 데이터 준비 ##############################
 import numpy as np 
-from keras import datasets              
-from keras.utils import np_utils 
+from tensorflow.keras import datasets              
+from tensorflow.keras.utils import np_utils 
  
 (X_train, y_train), (X_test, y_test) = datasets.mnist.load_data()
  
