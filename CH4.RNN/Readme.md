@@ -92,3 +92,33 @@ self.compile(loss='binary_crossentropy',
 
 ### 2.4 학습 및 성능평가
 - 학습 및 성능 평가를 담당할 클래스를 만든다.
+```
+class Machine:
+    def __init__(self,
+                 max_features=20000,
+                 maxlen=80):
+        self.data = Data(max_features, maxlen)
+        self.model = RNN_LSTM(max_features, maxlen)
+```
+- max_features=20000, maxlen=80으로 지정한다.
+- max_features는 다루는 단어의 최대수이다.
+  - 빈도순위가 20000등 안에 드는 단어까지만 취급한다는 뜻.
+  - **keras.datasets.imdb.load_data함수에 들어가는 매개변수**이다.
+- 학습과 평가를 수행하는 run()함수를 만든다.
+```
+    def run(self, epochs=3, batch_size=32):
+        data = self.data
+        model = self.model
+        print('Training stage')
+        print('==============')
+        model.fit(data.x_train, data.y_train,
+                  batch_size=batch_size,
+                  epochs=epochs,
+                  validation_data=(data.x_test, data.y_test))
+
+        score, acc = model.evaluate(data.x_test, data.y_test,
+                                    batch_size=batch_size)
+        print('Test performance: accuracy={0}, loss={1}'.format(acc, score))
+```
+- 평가결과는 수행하는 컴퓨터마다 무작위로 선정되는 seed값의 차이로 약간 달라질 수 있다.
+- 전체 코드는 [4-1.py]()에서 확인가능하다.
