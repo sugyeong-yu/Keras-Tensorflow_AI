@@ -37,5 +37,5 @@ X_test = X_test / 255.0
 # 분류 DNN 학습 및 테스팅 ####################
 model = DNN(Nin, Nh_l, Nout)
 history = model.fit(X_train, y_train, epochs=5, batch_size=100, validation_split=0.2)
-performace_test = model.evaluate(X_test, y_test, batch_size=100)
+performace_test = model.evaluate(X_test, y_test, batch_size=100) # model.evaluate > loss와 acc을 제공
 print('Test Loss and Accuracy ->', performace_test)
