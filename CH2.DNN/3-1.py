@@ -24,7 +24,7 @@ from keras.utils import np_utils
  
 (X_train, y_train), (X_test, y_test) = datasets.mnist.load_data()
  
-y_train = np_utils.to_categorical(y_train)
+y_train = np_utils.to_categorical(y_train) # one-hot 인코딩을 해주는 함수이다.
 y_test = np_utils.to_categorical(y_test)
  
 L, W, H = X_train.shape
