@@ -63,5 +63,5 @@ self.compile(loss=categorical_crossentropy', optimizer='adam', metrics=['accurac
 ## 2.3 학습 및 평가
 - 최종 성능평가 손실과 정확도는 각각 0.099와 0.97로 ANN의 결과(0.109,0.97)와 매우 유사하다.
 - 하지만 학습데이터가 작거나 복잡한 이미지에서는 일반적으로 DNN이 더 우수한 성능을 보인다고 알려져있다.
-
+- 최종 코드는 [3-1.py](https://github.com/sugyeong-yu/Keras_AI/blob/main/CH2.DNN/3-1.py) 에서 
 # 3. 컬러 이미지를 분류하는 DNN구현
