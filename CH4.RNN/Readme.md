@@ -139,3 +139,21 @@ from keraspp import skeras
 ```
 - model_selection : 데이터를 학습과 검증용으로 나누는 함수
 - skeras : 케라스 학습결과를 그래프로 그려주는 기능을 제공하는 서브패키지
+### 3.2 데이터불러오기
+- Dataset class를 만든다.
+```
+class Dataset:
+    def __init__(self, fname='international-airline-passengers.csv', D=12):
+```
+- 초기화 함수 파라미터로 데이터파일명과 시계열 길이가 주어진다.
+- 다음으로 데이터를 불러와 학습데이터와 평가데이터를 나눈다.
+```
+        data_dn = load_data(fname=fname)
+        X, y = get_Xy(data_dn, D=D)
+        X_train, X_test, y_train, y_test = model_selection.train_test_split(X, y, test_size=0.2, random_state=42) 
+```
+- 다음으로는 이 클래스를 이용할때 결과를 볼 수 있도록 결과를 멤버변수에 저장한다.
+```
+self.X, self.y = X, y
+self.X_train, self.X_test, self.y_train, self.y_test = X_train, X_test, y_train, y_test   
+```
