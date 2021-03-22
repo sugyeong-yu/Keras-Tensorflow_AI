@@ -37,3 +37,58 @@ from keras import layers, models
 - layers : 인공신경망의 계층을 만드는 서브패키지
   - Dense, Embedding, LSTM 사용가능
 ### 2.2 데이터준비
+- IMDB : 케라스가 제공하는 공개데이터
+  - 25000건의 영화평과 이진회된 영화평점정보(추첨=1, 비추천=0)을 담고있다.
+  - 평점정보는 별점이 많은경우는 긍정, 그렇지 않으면 부정으로 나뉜정보다
+- 데이터클래스 선언
+```
+class Data:
+    def __init__(self, max_features=20000, maxlen=80):
+        (x_train, y_train), (x_test, y_test) = imdb.load_data(
+            num_words=max_features)
+```
+- 서브패키지 imdb안의 load_data()를 이용해 데이터를 불러옴
+- 최대 단어 빈도를 max_feature값으로 제안함. > 여기서는 20000이 사용됨.
+
+```
+x_train = sequence.pad_sequences(x_train, maxlen=maxlen)
+x_test = sequence.pad_sequences(x_test, maxlen=maxlen)
+```
+- 일반적으로 데이터셋의 문장들은 길이가 다 다르기때문에 LSTM이 처리하기 적합하도록 길이를 통일하는 작업을 진행한다.
+- 문장에서 maxlen이후의 단어들은 케라스 서브패키지인 sequence에서 제공하는 pad_sequences()함수로 잘라낸다.
+  - 여기서는 최대길이를 80으로 제한함.
+- 문장의 길이가 maxlen보다 작을경우 부족한 부분을 0으로 채워준다.
+  - value라는 변수로 채우는 값을 설정할 수 있다.
+
+### 2.3 모델링
+```
+class RNN_LSTM(models.Model):
+    def __init__(self, max_features, maxlen):
+```
+- 모델링은 ```models.Model``` 클래스를 상속해서 만든다.
+- 입력층을 먼저 만들고 다음으로 임베딩계층을 포함한다.
+```
+x = layers.Input((maxlen,))
+h = layers.Embedding(max_features, 128)(x)
+```
+- 최대 특징점수를 20000으로 설정하였으며 임베딩 후 출력벡터크기를 128로 설정하였다.
+- 입력의 각 샘플은 80개의 원소로 된 1차원 신호열이였지만 임베딩 계층을 통과하며 128의 길이를 가지는 벡터로 바뀌면서 8 * 128로 바뀐다.
+```
+h = layers.LSTM(128, dropout=0.2, recurrent_dropout=0.2)(h)
+y = layers.Dense(1, activation='sigmoid')(h)
+super().__init__(x, y)
+```
+- 노드128개로 구성된 LSTM계층을 포함한다.
+- dropout, recurrent_dropout : 일반 드롭아웃과 순환 드롭아웃을 모두 20%로 설정하여 사용하였다.
+- 최종적으로 출력을 sigmoid활성화 함수로 구성된 출력노드하나로 구성한다.
+```
+self.compile(loss='binary_crossentropy',
+                     optimizer='adam', metrics=['accuracy'])
+```
+- 손실함수와 최적화 함수를 argument로 지정하여 모델을 컴파일한다.
+- 긍정인지 부정인지에 대한 이진판별값을 출력으로 다룬다.
+  - 손실함수를 binary_crossentropy로, 최적화 함수를 adam으로 설정
+  - 학습기간에는 에포크마다 손실뿐만아니라 정확도도 구하도록 **metric에 accuracy를 추가.**
+
+### 2.4 학습 및 성능평가
+- 학습 및 성능 평가를 담당할 클래스를 만든다.
