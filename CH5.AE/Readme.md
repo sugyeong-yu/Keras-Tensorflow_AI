@@ -92,5 +92,27 @@ x_test=x_test.resape((len(x_test),-1))
 - 데이터의 shape은 (이미지 수, 이미지의길이) 를 나타낸다.
 
 ### 2.3 완전연결계층 AE 학습
- 
+- 주요 파라미터들과 AE모델의 인스턴스를 정의한다.
+```
+x_nodes=784
+z_dim=36
+autoencoder=AEA(x_nodes,z_dim)
+```
+- 학습은 fit()으로 수행한다.
+```
+ history = autoencoder.fit(X_train, X_train,
+                              epochs=10,
+                              batch_size=256,
+                              shuffle=True,
+                              validation_data=(X_test, X_test))
+```
+- 입력과 출력을 모두 x_train으로 설정하여 학습한다.
+- 총 10회 학습하며 1회 배치마다 데이터 256개를 process에 보내도록 설정.
+
+### 2.4 학습 효과 분석
+```
+from keraspp.skeras import plot_loss,plot_acc
+import matplotlib.pyplot as plt
+```
+- plot_loss()와 plot_acc()는 학습결과를 그래프로 표시하는 함수이다.
 ## 3. 합성곱 계층을 이용한 AE구현
