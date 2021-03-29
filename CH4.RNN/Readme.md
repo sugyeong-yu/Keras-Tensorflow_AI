@@ -154,6 +154,117 @@ class Dataset:
 ```
 - 다음으로는 이 클래스를 이용할때 결과를 볼 수 있도록 결과를 멤버변수에 저장한다.
 ```
-self.X, self.y = X, y
-self.X_train, self.X_test, self.y_train, self.y_test = X_train, X_test, y_train, y_test   
+      self.X, self.y = X, y
+      self.X_train, self.X_test, self.y_train, self.y_test = X_train, X_test, y_train, y_test   
 ```
+- load_data() 구현
+```
+    def load_data(fname='international-airline-passengers.csv'):
+        dataset = pd.read_csv(fname, usecols=[1], engine='python', skipfooter=3)
+        data = dataset.values.reshape(-1)
+```
+- pd.read_csv(fname,usecols=[1] : 데이터 중 승객 수에 해당하는 1번쨰 열만 불러온다. 
+- 다음으로 pandas df 에서 numpy array로 변환 후 1차원모양으로 만들어준다.
+- 데이터의 가로축은 time, 세로축은 passengers 이다.
+```
+        plt.plot(data)
+        plt.xlabel('Time'); plt.ylabel('#Passengers')
+        plt.title('Original Data')
+        plt.show()
+
+        # data normalize
+        data_dn = (data - np.mean(data)) / np.std(data) / 5
+        plt.plot(data_dn)
+        plt.xlabel('Time'); plt.ylabel('Normalized #Passengers')
+        plt.title('Normalized data by $E[]$ and $5\sigma$')
+        plt.show()
+
+        return data_dn
+```
+- 데이터를 표준화한다.
+  - 표준화 방법은 평균을 제거하고 분산을 단위 값으로 만든다. 
+  - 여기서는 분산의 제곱근을 5로 나눈다.
+  - 따라서 데이터는 표준화된 승객 수 이다.
+- 다음으로 get_Xy()를 구현한다.
+```
+    def get_Xy(data, D=12):
+        # make X and y
+        X_l = []
+        y_l = []
+        N = len(data) # 몇개월 가량의 승객 수
+        assert N > D, "N should be larger than D, where N is len(data)"
+        for ii in range(N-D-1):
+            X_l.append(data[ii:ii+D])
+            y_l.append(data[ii+D])
+        X = np.array(X_l)
+        X = X.reshape(X.shape[0], X.shape[1], 1)
+        y = np.array(y_l)
+        print(X.shape, y.shape)
+        return X, y
+```
+- 이는 D 샘플만큼의 시계열 데이터를 한칸씩 옮겨가며 시계열벡터로 만든다.
+- 그리고 D+1샘플의 값을 레이블로 하였다.
+- 즉,  D개월간의 승객 수 변화를 통해 다음달 승객 수를 예측할수 있는지를 알아보는 데이터셋을 만들게 된다.
+### 3.3 LSTM 시계열 회귀 모델링
+- 케라스에서 제공하는 모델을 이용해 만든다. 
+- 먼저 입력계층을 정의한다.
+```
+m_x = layers.Input(shape=shape)
+```
+- 입력 데이터의 모양은 X.shape[1:] 이다.
+  - n,h,w,c 중에 하나의 시계열 데이터에 대한 shape(h,w,c)를 사용
+- 다음으로 LSTM과 출력 계층을 설정한다.
+```
+m_h=layers.LSTM(10)(m_x)
+m_y=layers.Dense(1)(m_h)
+```
+- LSTM의 노드 수는 10
+- 출력 계층의 노드 수는 이진판별이므로 1
+- 다음으로 모델을 정의한다.
+```
+m=models.Model(m_x,m_y)
+m.compile('adam','mean_squared_error')
+m.summary()
+```
+### 3.4 학습하고 평가하기
+- Machine class는 시계열 LSTM을 학습하고 평가하는 클래스이다.
+- 클래스 선언과 초기화
+```
+class Machine():
+    def __init__(self):
+        self.data = Dataset()
+        shape = self.data.X.shape[1:]
+        self.model = rnn_model(shape)
+```
+- 데이터생성에 필요한 Dataset() 클래스의 객체를 만듬.
+- LSTM입력 계층의 크기를 shape이라는 변수에 저장.
+  - shape은 (12,1)이 된다.
+- rnn_model()함수로 LSTM모델을 만들어 model변수에 저장.
+- 다음으로 실행함수를 만든다.
+```
+     def run(self, epochs=400):
+            d = self.data
+            X_train, X_test, y_train, y_test = d.X_train, d.X_test, d.y_train, d.y_test
+            X, y = d.X, d.y
+            m = self.model 
+```
+- self.data의 내부변수들인 X_train, X_test, y_train, y_test를 선언
+- 모델의 학습을 진행한다.
+```
+            h = m.fit(X_train, y_train, epochs=epochs, validation_data=[X_test, y_test], verbose=0)
+
+            skeras.plot_loss(h)
+            plt.title('History of training')
+            plt.show()
+```
+- fit()으로 학습한다. 
+- 학습이 완료되면 학습 곡선을 ```skkeras.plot_loss()```로 그린다.
+- 학습이 얼마나 잘되었는가 평가한다.
+```
+             yp = m.predict(X_test)
+             print('Loss:', m.evaluate(X_test, y_test))
+```
+- evaluate()로 학습성능을 평가한다.
+- 학습이 끝난 모델을 평가데이터를 이용해 예측한 뒤 정확도를 계산.
+- 원래 레이블 정보인 y_test와 예측한 정보인 yp를 그려 서로를 비교한다.
+- 전체코드는 [4.2.py]()에서 확인가능하다.
