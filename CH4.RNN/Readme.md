@@ -267,4 +267,4 @@ class Machine():
 - evaluate()로 학습성능을 평가한다.
 - 학습이 끝난 모델을 평가데이터를 이용해 예측한 뒤 정확도를 계산.
 - 원래 레이블 정보인 y_test와 예측한 정보인 yp를 그려 서로를 비교한다.
-- 전체코드는 [4.2.py]()에서 확인가능하다.
+- 전체코드는 [4-2.py](https://github.com/sugyeong-yu/Keras_AI/blob/main/CH4.RNN/4-2.py)에서 확인가능하다.
