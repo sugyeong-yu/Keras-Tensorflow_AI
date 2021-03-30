@@ -116,3 +116,48 @@ import matplotlib.pyplot as plt
 ```
 - plot_loss()와 plot_acc()는 학습결과를 그래프로 표시하는 함수이다.
 ## 3. 합성곱 계층을 이용한 AE구현
+- 완전연결계층을 이용한 방법은 이미지의 위치별로 각각 다르게 처리하기 때문에 비효율적이다.
+- 합성곱 계층방식은 비교적 가중치수가 줄어 학습 최적화에도 용이하다.
+### 3.1 합성곱AE 모델링
+```
+from keras import layers, models
+
+def Conv2D(filters, kernel_size, padding='same', activation='relu'):
+    return layers.Conv2D(filters, kernel_size, padding=padding, activation=activation)
+```
+- Conv2D(), Maxpooling2D(), Upsampling2D(), Dropout() 을 사용한다.
+- 다음으로 AE의 객체를 구성한다.
+```
+class AE(models.Model):
+    def __init__(self, org_shape=(1, 28, 28)):
+        # Input
+        original = layers.Input(shape=org_shape)
+```
+- MNIST의 경우 입력계층에 들어가는 데이터모양은 채널정보의 위치에 따라 (1,28,28) 또는 (28,28,1) 이다.
+- 채널의 위치는 케라스 설정에서 할 수 있다.
+- 합성곱AE는 총 7개의 합성곱계층으로 구성된다.
+- 1~3 번째까지는 부호화를 위한 합성곱계층
+- 4~6 번째까지는 복호화를 위한 합성곱계층
+- 7 번쨰는 부호화 및 출력을 하는 합성곱 계층이다.
+- 2차원 이미지를 출력으로 하기 때문에 마지막 층도 합성곱계층으로 구성한다.
+- 첫번째 합성곱계층은 4개의 3 * 3 필터로 구성된다.
+```
+ # encoding-1
+        x = Conv2D(4, (3, 3))(original)
+        x = layers.MaxPooling2D((2, 2), padding='same')(x)
+```
+- 합성곱계산뒤 맥스풀링이 적용된다.
+- 이미지의 크기는 4분의 1로 줄어들고 개수는 4배가 되어 14 * 14 이미지가 4장 출력된다.
+- 두번째로 3 * 3 필터 8개를 적용한다.
+```
+        # encoding-2
+        x = Conv2D(8, (3, 3))(x)
+        x = layers.MaxPooling2D((2, 2), padding='same')(x)
+```
+- 이 계층을 지나면 7 * 7 이미지가 8장 출력된다.
+- 세번째 합성곱 계층은 부호화결과를 출력한다.
+
+```
+        # encoding-3: encoding output: 7x7 pixels
+        z = Conv2D(1, (7, 7))(x)
+```
