@@ -42,4 +42,18 @@
 - 이를 위해서는 각 G와 D가 최적으로 구성되고 둘의 밸런스가 잘 맞아야 한다.
 
 ## 2. 확률분포 생성을 위한 완전연결계층 GAN구현
+- 처음 제안된 GAN논문에 게재된 예제를 구현해본다. 
+- 이 예제는 GAN으로 정규분포를 생성한다.
+- 생성에 사용하는 무작위 잡음벡터 Z는 균등분포확률신호인데 출력은 정규분포확률신호이다.
+### 2-1. 패키지 임포드
+```
+import numpy as np
+import matplotlib.pyplot as plt
+
+from keras import models
+from keras.layers import Dense, Conv1D, Reshape, Flatten, Lambda
+from keras.optimizers import Adam
+from keras import backend as K
+```
+### 2-2. Data 생성
 
