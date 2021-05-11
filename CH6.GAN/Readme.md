@@ -56,4 +56,60 @@ from keras.optimizers import Adam
 from keras import backend as K
 ```
 ### 2-2. Data 생성
+- 데이터를 생성하는 클래스
+```
+class Data:
+  def __init__(self,mu,sigma,ni_D):
+    self.real_sample=lambda n_batch: np.random.normal(mu,sigma,(n_batch,ni_D))
+    self.in_sample=lambda n_batch : np.random.rand(n_batch,ni_D)
+```
+- GAN에는 2가지 데이터가 필요하다.
+1. GAN으로 흉내내고자 하는 실제데이터
+2. 실제데이터와 통계적 특성이 다른 무작위잡음 데이터
+- 이 둘을 만들기 위해서는 확률변수를 생성하는 함수가 필요하다.
+- 정규분포 확률변수는 numpy아래의 random.normal()함수로 생성. 이를 lambda로 만들어 반환.
+- 이를 통해 추후 원하는 수만큼 확률변수를 만들 수 있다.
+- argument 확률은 random.rand()를 사용해 연속균등분포로 지정한다.
 
+### 2-3. 머신구현하기
+- 머신은 데이터와 모델로 GAN을 학습하고 성능을 평가하는 인공신경망 전체를 총괄하는 객체이다.
+- __init__() : 클래스 초기화함수
+- run() : 실행 멤버함수
+- run_epochs() : 에포크 단위 실행멤버함수
+- train() : 학습진행멤버함수
+- train_epoch(): 매순간 학습진행멤버함수
+- train_D() : 판별망 학습멤버함수
+- train_GD() : 학습용 생성망 학습멤버함수
+- test_and_show() : 성능평가 및 그래프그리기 멤버함수
+- print_stat() : 상황출력정적함수
+
+- GAN이 임의의 통계특성을 지닌 정규분포를 생성하도록 평균값과 표준편차를 4와 1.25로 설정합니다.
+```
+class Machine():
+  def __init__(self,n_batch=10,ni_D=100):
+    data_mean=4
+    data_stddev=1.25
+    self.data=Data(data_mean,data_stddev,ni_D)
+    self.gan=GAN(ni_D=ni_D, nh_D=50,nh_G=50)
+    self.n_batch=n_batch
+    self.n_iter_G=1
+    self.n_iter_D=1
+```
+- D가 한번에 받아들일 확률변수 수 (ni_D)를 100개로 설정 
+  - 잠재벡터(잡음)길이가 100이라는것.
+- GAN을 구성하는 2가지 신경망인 G와D 은닉계층의 노드수를 모두 50으로 설정
+- 배치단위를 설정(n_batch)
+- G와D의 배치별 최적화 횟수결정(n_iter)
+- G와D의 각 배치마다 에포크를 다르게 가져갈수도있다.
+  - 기본은 한번배치가 수행될떄 D한번, G한번이다.
+  - GAN을 처음제안한 논문에서는 배치별로 D를 G보다 더 많이 학습하면 최적화에 도움이 된다고 언급되어있다.
+  - 이는 하이퍼파라미터로 설정가능(n_iter)
+- 다음으로 머신클래스의 실행을 담당하는 run()를 만든다.
+```
+def run(self,n_repeat=30000//200, n_show=200,n_test=100):
+  for ii in range(n_repeat):
+    print('stage',ii,'(epoch: {})'.format(ii*n_show))
+    self.run_epochs(n_show,n_test)
+    plt.show()
+```
+- run_epochs는 호출될때마다 학습을 n_show번 수행한다.
