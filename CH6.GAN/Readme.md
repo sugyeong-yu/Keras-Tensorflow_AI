@@ -182,4 +182,30 @@ def test_and_show(self,n_test):
   self.show_hist(Real,Gen,Z)
   Machine.print_stat(Real,Gen)
 ```
+- 우선 무작위잡음Z를 G의 입력으로 얻은 fake data Gen을 출력한다.
+- 실제이미지를 n_test만큼 가져와서 Real에 저장한다.
+- print_stat : 데이터의 통계적 특성을 텍스트로 표시한다.
+```
+def show_hist(self,Real,Gen,Z):
+  plt.hist(Real.reshape(-1),histtype='step',label='Real')
+  plt.hist(Gen.reshape(-1),histtype='step',label='Generated')
+  plt.hist(Z.reshape(-1),histtype='step',label='Input')
+  plt.legend(loc=0)
+```
+- 학습진행경과에 대한 그래프를 그리는 함수이다.
+- 통계적 특성을 plt.hist()를 사용해 표시
+- plt.legend()는 그래프의 세 선들을 구분하는데 사용한다.
+- 다음으로 G가 얼마나 실제데이터의 확률분포를 따르는 데이터를 만드는지 확인하기 위해 정적멤버함수를 만든다.
+```
+@staticmethod
+def print_stat(Real,Gen):
+  def stat(d):
+    return (np.mean(d),np.std(d))
+  print('mean and std of real',stat(Real))
+  print('mean and std of fake',stat(Gen))
+```
+- 이함수는 클래스의 멤버변수나 멤버함수를 사용하지 않으므로 정적멤버함수로 지정하였다.
+- stat()은 벡터의 평균과 분산을 계산한다.
+
+### 2-4. GAN모델링
 
