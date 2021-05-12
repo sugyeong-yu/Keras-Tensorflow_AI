@@ -113,3 +113,39 @@ def run(self,n_repeat=30000//200, n_show=200,n_test=100):
     plt.show()
 ```
 - run_epochs는 호출될때마다 학습을 n_show번 수행한다.
+```
+def run_epochs(self,epochs,n_test):
+  self.train(epochs)
+  self.test_and_show(n_test)
+```
+- 이 함수는 epochs만큼 학습을 진행하는 함수를 호출 후
+- 학습된 신경망에 내부 성능 평가 데이터를 넣어서 그 성능을 결과그래프로 보여주는 함수를 호출
+- 다음으로 GAN의 학습을 진행하는 함수를 만든다.
+```
+def train(self,epochs):
+  for epoch in range(epochs):
+    self.train_each()
+```
+- 이 함수는 매 에폭마다 train_each()를 호출해 학습한다. 
+- D가 약간 진화되면 G는 이에 맞추어 자신을 좀 더 진화시킨다. (때로는 D가 G보다 더 진화할 수도 아닐수도 있음)
+- 예제에서는 D와G가 한번씩 학습되도록 하였다.
+```
+ def train_each(self):
+  for it in range(self.n_iter_D):
+    self.train_D()
+  for it in range(self.n_iter_G):
+    self.train_GD()
+```
+- train_GD는 D의 결과를 피드백받아 G를 학습시키는 과정이다.
+- D와 G는 각각 n_iter만큼 학습 (예제에서는 1)
+```
+def train_D(self):
+  gan=self.gan
+  n_batch=self.n_batch
+  data=self.data
+  
+  Real=data.real_sample(n_batch)
+  Z=data.insample(n_batch)
+```
+- 실제데이터에서 n_batch만큼 샘플을 가져온다 (정규분포를 따르는 데이터)
+- 입력샘플의 분포를 균등분포로 정함(Z) 
