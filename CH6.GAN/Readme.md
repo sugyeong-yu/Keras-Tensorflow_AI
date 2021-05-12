@@ -149,3 +149,37 @@ def train_D(self):
 ```
 - 실제데이터에서 n_batch만큼 샘플을 가져온다 (정규분포를 따르는 데이터)
 - 입력샘플의 분포를 균등분포로 정함(Z) 
+
+```
+  GAN=gan.G.predict(Z)
+  gan.D.trainable=True
+  
+  gan.D_train_on_batch(Real,Gen)
+```
+- 입력샘플Z를 G에 통과시켜 생성망의 출력으로 바꿔준다.
+- D는 GD(학습용생성망)을 사용할때 학습이 되지않도록 막아두기 때문에 D를 훈련시킬때는 gan.D.trainable을 True로 바꾸고 진행해야한다.
+- 그리고 D를 학습시킨다. 
+- 다음은 GD(학습용 생성망)을 학습시키는 함수이다.
+```
+def train_GD(self):
+  gan=self.gan
+  n_batch=self.n_batch
+  data=self.data
+  Z=data.in_sample(n_batch)
+  
+  gan.D.trainable=False
+  gan.GD_train_on_batch(Z)
+```
+- n_batch만큼의 임의의 분포입력 샘플을 만든다.(Z)
+- 이 입력이 G에 들어가면 모든 D는 실제샘플로 착각하도록 GD_train_on_batch를 이용해 학습한다.
+- GD를 학습할때에는 실제데이터를 다룰 필요가 없기 때문에 D보다는 코드가 단순하다.
+- 다음으로 GAN의 성능을 평가하고 확률예측결과를 그래프로 그리는 멤버함수를 만든다.
+```
+def test_and_show(self,n_test):
+  data=self.data
+  Gen,Z=self.test(n_test)
+  Real=data.real_sample(n_test)
+  self.show_hist(Real,Gen,Z)
+  Machine.print_stat(Real,Gen)
+```
+
