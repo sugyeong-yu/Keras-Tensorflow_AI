@@ -208,4 +208,40 @@ def print_stat(Real,Gen):
 - stat()은 벡터의 평균과 분산을 계산한다.
 
 ### 2-4. GAN모델링
+- 다음 순서로 GAN을 모델링한다.
+1. 클래스초기화 __init__()
+2. D구현함수 gen_D()
+3. G구현함수 gen_G()
+4. 학습용 생성망 make_GD()
+5. D 학습함수 D_train_on_batch()
+6. G 학습함수 G_train_on_batch()
 
+- 초기화 함수
+```
+class GAN:
+  def __init__(self,ni_D,nh_D,nh_G):
+    self.ni_D=ni_D
+    self.nh_D=nh_D
+    self.nh_G=nh_G
+    
+    self.D=self.gen_D()
+    self.G=self.gen_G()
+    self.GD=self.make_GD()
+```
+- ni_D : 판별망의 입력길이
+- nh_D : 판별망의 두 은닉계층의 노드 수
+- nh_G : 생성망의 두 은닉계층의 노드 수
+
+- 다음으로 판별망D를 구현하는 함수를 만든다.
+- 입력 -> lambda (2 * ni_D) -> Dense(nh_D,ReLU) -> Dense(nh_D,ReLU) -> Dense(1,sigmoid) -> 출력
+- 두 은닉계층과 출력계층은 모두 fc layer로 구성
+```
+def gen_D(self):
+  ni_D=self.ni_D
+  nh_D=self.nh_D
+  D=models.Sequential()
+  D.add(Lambda(add_decorate,output_shape=add_decorate_shape,input_shape=(ni_D,)))
+```
+- 입력신호를 변형하는 계층을 케라스에서 제공하는 람다클래스를 이용해 만들 수 있다.
+- Lambda class는 계층의 동작을 처리하는 add_decorate()함수와 계층을 통과한 출력텐서의 모양을 입력받는다.
+- 
