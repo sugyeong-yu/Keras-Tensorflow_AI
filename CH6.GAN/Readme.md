@@ -251,4 +251,101 @@ def gen_D(self):
   model_compile(D)
   return D
 ```
+- 은닉계층인 두 Dense()는 nh_D만큼의 노드로 구성되어있다.
+- 다음으로 람다계층의 처리함수인 add_decorate()을 만든다.
+```
+def add_decorate(x):
+  m=K.mean(x,axis=-1,keepdims=True)
+  d=K.square(x-m)
+  return K.concatenate([x,d],axis=-1)
+```
+- 이 합수는 입력벡터에 새로운 벡터를 추가한다. 
+- 새로운 벡터는 입력벡터의 각요소에서 벡터평균을 뺀 값을 자승한 값을 가진다.(x-m)** 2 
+- 벡터 추가는 K.concatenate()로 구현한다. 
+- axis=-1 : 마지막차원을 서로 붙이라는  argument
+- 다음으로 출력데이터의 모양을 지정하는 add_decorate_shape(input_shape)을 만든다.
+```
+def add_decorate_shape(input_shape):
+  shape=list(input_shape)
+  assert len(shape)==2
+  shape[1] *= 2
+  return tuple(shape)
+```
+- 이 함수는 input_shape을 입력받아 람다계층의 처리함수가 돌려주는 출력벡터의 크기를 설정하는 형태이다.
+- 모델을 컴파일하는 model_compile()을 구현한다.
+```
+lr=2e-4
+adam=Adam(lr=lr,beta_1=0.9,beta_2=0.999)
+def model_compile(model):
+  return model.compile(loss='binary_crossentropy',optimizer=adam,metrics=['accuracy'])
+```
 
+- 다음으로 G를 구현하는 함수를 만든다.
+- 입력 -> reshape(ni_D,1)->Conv1d(nh_Gx(1))->Conv1D(nh_Gx(1))->Conv1D(1 * (1))->Flatten->출력
+```
+def gen_G(self):
+  ni_d=self.ni_D
+  nh_G=self.nh_D
+  G=models.Sequential() #(batch,ni_D)
+  G.add(Reshape((ni_D,1),input_shape=(ni_D,)))
+  G.add(Conv1D(nh_G,1,activation='relu'))
+  G.add(Conv1D(nh_G,1,activation='sigmoid'))
+  G.add(Conv1D(1,1))
+  G.add(Flatten())
+```
+- G에 들어가는 입력데이터의 모양은 (batch,input_dim)이다.
+- 1차원 Conv에 입력을 넣으려면 (batch,steps,input_dim)으로 데이터차원을 확대해야한다. 
+- 차원을 확대한 후 두 1차원합성곱계층을 거쳐 확률변수의 확률분포를 바꿔준다.
+- 필터수 nh_G를 늘리게되면 입력신호의 범위를 좀 더 세분화해서 처리할 수 있다. 
+- 1은 커널크기를 말하며 입력벡터간 상관도를 높여주는 역할을 한다.
+- activation 함수는 정말한 조정을 위해 한번은 시그모이드로 설정 
+- 마지막은 출력이 하나여야 한다. 따라서 Conv1D(1,1)
+- 두번쨰 합성곱 계층에 의한 변환이 끝나면 1차원벡터로 복구한다.
+- 추후 판별망은 완전연결계층으로 판별하기 때문에 생성망의 출력을 1차원으로 바꾸는 것이다. 
+
+- 케라스에서는 입력데이터의 모양을 1차원으로 지정해도 내부에서는 2차원으로 동작한다. (배치, 데이터수)
+- 따라서 실제로 케라스에서는 첫번째차원을 지정하지않아도 된다.(배치)
+- 다만, 고급기능인 람다계층이나 손실함수에서 K.mean(), K.square()같은 함수에서는 배치크기를 지정해야한다.
+```
+model_compile(G)
+return(G)
+```
+- 모델링이 끝나면 컴파일한다.
+
+- 학습용생성망을 구현하는 함수를 만든다.
+- 이는 G의 상단에 D를 달아주어 구현한다.
+- 이때, D의 가중치는 동결시켜야한다
+```
+def make_GD(self):
+  G,D=self.G,self.D
+  GD=models.Sequential()
+  GD.add(G)
+  GD.add(D)
+  
+  D.trainable=False
+  model_compile(GD)
+  D.trainable=True
+  return GD
+```
+- GD에 G를 add한 후 D를 add한다. 순서상으로는 상단에 D가 위치한다. 
+
+- 다음으로 D의 학습을 진행하는 함수를 만든다.
+```
+def D_train_on_batch(self,Real,Gen):
+  D=self.D
+  X=np.concatenate([Real,Gen],axis=0)
+  y=np.array([1]*Real.shape[0]+[0]*Gen.shape[0])
+  D.train_on_batch(X,y)
+```
+- 데이터와 레이블을 만들고 D.train_on_batch()를 이용해 학습일 진행, 손실값을 계산한다.
+- train_on_batch는 fit()과는 처리하는 데이터 양이 다르다. 
+- fit은 전체를 받아 배치단위로 반복학습
+- train_on_batch는 배치만큼 받아 1회만 학습
+- 다음으로 학습용 생성망을 학습시키는 멤버함수를 만든다.
+```
+def GD_train_on_batch(self,Z):
+  GD=self.GD
+  y=np.array([1]*Z.shape[0])
+  GD.train_on_batch(Z,y)
+```
+- 허구값을 D에서 실제로 판별하도록 학습해야하기 때문에 목표 출력값을 모두 1로 설정했다.
