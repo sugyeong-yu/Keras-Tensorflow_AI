@@ -244,4 +244,11 @@ def gen_D(self):
 ```
 - 입력신호를 변형하는 계층을 케라스에서 제공하는 람다클래스를 이용해 만들 수 있다.
 - Lambda class는 계층의 동작을 처리하는 add_decorate()함수와 계층을 통과한 출력텐서의 모양을 입력받는다.
-- 
+```
+  D.add(Dense(nh_D,activation='relu'))
+  D.add(Dense(nh_D,activation='relu'))
+  D.add(Dense(1,activation='sigmoid'))
+  model_compile(D)
+  return D
+```
+
