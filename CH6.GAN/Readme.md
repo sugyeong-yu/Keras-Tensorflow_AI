@@ -349,3 +349,85 @@ def GD_train_on_batch(self,Z):
   GD.train_on_batch(Z,y)
 ```
 - 허구값을 D에서 실제로 판별하도록 학습해야하기 때문에 목표 출력값을 모두 1로 설정했다.
+
+## 3. 필기체를 생성하는 합성곱계층 GAN구현
+- 입력한 필기체를 보고 배워 새로운 유사 필기체를 만든다. 
+- GAN에 들어있는 두 신경망은 합성곱계층을 이용해 만든다. 
+```
+from keras.datasets import mnist
+from PIL import Image
+import numpy as np
+import math, os
+import keras.backend as K
+import tensorflow as tf
+```
+- 이번 예시처럼 신경망의 출력이 스칼라나 벡터가 아닌 다차원일 경우 해당 차원에 맞는 손실함수가 필요하다.
+- 4차원 데이터를 이용하는 손실함수를 keras backend와 tensorflow로 구현한다.
+```
+def mse_4d(y_true,y_pred):
+  return K.mean(K.square(y_pred-y_true),axis(1,2,3))
+def mse_4d_tf(y_true,y_pred):
+  return tf.reduce_mean(tf.square(y_pred - y_true), axis(1,2,3))
+```
+- 평균제곱오차를 구했다. 4차원데이터이므로 0축을 제외하고는 평균계산이 다른 모든축에 대해 이루어지도록 하였다.
+
+### 3-1. 합성곱계층 GAN수행
+- 매개변수를 효율적으로 입력받을 수 있도록 argparse 를 사용한다.
+```
+import argparse
+def main():
+  parser=argparse.ArgumentParser()
+  parser.add_argument('--batch_size',type=int,default=16)
+  parser.add_argument('--epochs',type=int,default=1000)
+  등
+```
+```
+args= parser.parse_args()
+train(args)
+```
+### 3-2. 합성곱계층 GAN모델링
+```
+from keras import models, layers, optimizers
+class GAN(models.Sequential):
+  def __init__(self,input_dim=64):
+    super().__init__()
+    self.input_dim=input_dim
+    
+    self.generator=self.GENERATOR()
+    self.discriminator=self.DISCRIMINATOR()
+    
+    ## 학습용생성망( 생성망+판별망)
+    self.add(self.generator)
+    self.discriminator.trainable = False
+    self.add(self.discriminator)
+    self.compile_all()
+   
+   def compile_all():
+    d_optim=optimizers.SGD(lr=0.0005, momentum=0.9, nesterov=True)
+    g_optim=optimizers.SGD(lr=0.0005, momentum=0.9, nesterov=True)
+    
+    self.compile(loss='binary_crossentropy',optimizer=g_optim)
+    self.generator.compile(loss=mse_4d,optimizer='SGD')
+    self.discriminator.trainable=True
+    self.discriminator.compile(loss='binary_crossentropy',optimizer=d_optim)
+   
+   def GENERATOR(self):
+    
+    input_dim=self.input_dim
+    
+    model=models.Sequential()
+    model.add(layers.Dense(1024, activation='tanh',input_dim=input_dim)) # 입력이 1차원행렬
+    model.add(layers.Dense(128 * 7 * 7 ,activation='tanh'))
+    model.add(layers.BatchNormalization())
+    model.add(layers.Reshape((128,7,7),input_shape=(128 * 7 * 7,)))
+    model.add(layers.UpSampling2D(size=(2,2))) # (128,14,14)
+    model.add(layers.Conv2D(64,(5, 5),padding='same',activation='tanh')) # (64,?,?)
+    model.add(layers.UpSampling2D(size=(2,2)))
+    model.add(layers.Conv2D(1,(5,5),padding='same',activation='tanh'))
+    
+    return model
+    
+   def DISCRIMINATOR(self):
+    
+    model=models.Sequential()
+    model.add(layers.Conv2D(64,(5,5),padding='same',activation='tanh',input_shape=(1,28,28)))
