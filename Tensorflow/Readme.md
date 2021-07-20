@@ -42,6 +42,6 @@ for epoch in 100:
 ```
 print("result: ",sess.run(model,feed_dict={X:batch_x}))
 ```
-- Session을 통해 동작하지않고 직접 사용하는 경우 Tensor형태로 출력 > 결과값을 한눈에 볼 수 없음 
+- Session을 통해 동작하지않고 직접 사용하는 경우 Tensor형태로 출력 > 결과값을 한눈에 볼 수 없음\ 
  ```print("predict-",sess.run(tf.argmax(model,1),feed_dict={X:mnist.test.images}),"target-",tf.argmax(mnist.test.labels,1))``` \
 ![image](https://user-images.githubusercontent.com/70633080/126263666-0ea96684-b4e4-4a01-9531-af1fea5cc934.png)
