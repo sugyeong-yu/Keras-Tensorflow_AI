@@ -1,5 +1,11 @@
 # Tensorflow
+[골빈해커의 3분 딥러닝 텐서플로맛](http://www.yes24.com/Product/Goods/49853812)\
+![image](https://user-images.githubusercontent.com/70633080/126263877-c811fa03-70c7-4d7a-afe7-eb75a0c765e3.png)
 - tensorflow 1.5버전과 2.0버전에는 많은 문법의 차이가 존재한다.
+- 해당 책에서는 1.5version 기준으로 설명한다. 
+- 2.0 version과의 차이를 기준으로 학습.
+
+ 
 ## version 1.5
 - 입력데이터 선언 시 placeholder 사용 
   - 입력데이터가 정해지지 않은 상태에서 선언만 해놓는 것.
